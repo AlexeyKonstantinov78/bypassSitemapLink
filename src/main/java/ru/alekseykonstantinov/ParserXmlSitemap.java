@@ -69,7 +69,7 @@ public class ParserXmlSitemap {
         HttpRequest httpRequest = HttpRequest.newBuilder().GET().uri(uri).build();
         HttpResponse<InputStream> httpResponse = hl2.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
         log.info(getDateFormat() + " " + uri + " status code: " + httpResponse.statusCode());
-        //System.out.println(getDateFormat() + " " + uri + " status code: " + httpResponse.statusCode());
+
         return httpResponse;
     }
 
