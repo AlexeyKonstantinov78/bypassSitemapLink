@@ -1,7 +1,5 @@
 package ru.alekseykonstantinov;
 
-import lombok.extern.slf4j.Slf4j;
-
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
@@ -16,10 +14,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.logging.Logger;
 
-@Slf4j
+
 public class ParserXmlSitemapAsync {
-
+    static Logger log = Logger.getGlobal();
     private static List<String> listXml = new ArrayList<>();
     private static List<String> listUrl = new ArrayList<>();
     private static Boolean isAsync = true;

@@ -1,7 +1,5 @@
 package ru.alekseykonstantinov;
 
-import lombok.extern.slf4j.Slf4j;
-
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
@@ -16,12 +14,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.logging.Logger;
 
-@Slf4j
 public class ParserXmlSitemap {
-
+    final static Logger log = Logger.getGlobal();
     private static List<String> listXml = new ArrayList<>();
     private static List<String> listUrl = new ArrayList<>();
+    private static List<String> errorUrl = new ArrayList<>();
 
     public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException {
         String url = "https://nasosyvodoly.ru/sitemap_index.xml";
@@ -29,6 +28,7 @@ public class ParserXmlSitemap {
         getLinkType(url, "sitemap");
 
         if (!listXml.isEmpty()) {
+
             log.info("Запуск обхода listXml");
 
             listXml.stream().forEach(urlXml ->
@@ -51,6 +51,12 @@ public class ParserXmlSitemap {
                     }
             );
         }
+
+        if (!errorUrl.isEmpty()) {
+            errorUrl.stream().forEach(System.out::println);
+        } else {
+            log.info("Ошибок нет");
+        }
     }
 
     public static void getLinkType(String url, String type) {
@@ -68,7 +74,10 @@ public class ParserXmlSitemap {
         HttpClient hl2 = HttpClient.newHttpClient();
         HttpRequest httpRequest = HttpRequest.newBuilder().GET().uri(uri).build();
         HttpResponse<InputStream> httpResponse = hl2.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
-        log.info(getDateFormat() + " " + uri + " status code: " + httpResponse.statusCode());
+        log.info(uri + " status code: " + httpResponse.statusCode());
+        if (httpResponse.statusCode() != 200) {
+            errorUrl.add(uri + ";status code: " + httpResponse.statusCode());
+        }
 
         return httpResponse;
     }
