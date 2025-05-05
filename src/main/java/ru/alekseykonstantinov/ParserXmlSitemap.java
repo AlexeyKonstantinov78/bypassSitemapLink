@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.concurrent.ExecutionException;
 
 @Slf4j
 public class ParserXmlSitemap {
@@ -24,35 +23,28 @@ public class ParserXmlSitemap {
     private static List<String> listXml = new ArrayList<>();
     private static List<String> listUrl = new ArrayList<>();
 
-    public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException, ExecutionException {
-        URI uri = new URI("https://nasosyvodoly.ru/sitemap_index.xml");
+    public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException {
+        String url = "https://nasosyvodoly.ru/sitemap_index.xml";
 
-        HttpResponse<InputStream> httpResponse = sendHttpClient(uri);
-        InputStream input = httpResponse.body();
-        //printInputStream(input);
-        parseXml(input, "sitemap");
+        getLinkType(url, "sitemap");
 
         if (!listXml.isEmpty()) {
-            System.out.println("Запуск обхода listXml");
-            listXml.stream().forEach(url -> {
-                try {
-                    HttpResponse<InputStream> httpResponseU = sendHttpClient(new URI(url));
-                    InputStream inputU = httpResponseU.body();
-                    parseXml(inputU, "url");
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            log.info("Запуск обхода listXml");
+
+            listXml.stream().forEach(urlXml ->
+                    getLinkType(urlXml, "url")
+            );
         }
 
-        System.out.println(listXml.size());
-        System.out.println(listUrl.size());
+        log.info("Количество ссылок sitemap: " + listXml.size());
+        log.info("Количество всех ссылок на страницы: " + listUrl.size());
 
         if (!listUrl.isEmpty()) {
-            listUrl.stream().forEach(url ->
+            log.info("Запуск обхода listUrl");
+            listUrl.stream().forEach(urlPost ->
                     {
                         try {
-                            sendHttpClient(new URI(url));
+                            sendHttpClient(new URI(urlPost));
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
@@ -61,16 +53,25 @@ public class ParserXmlSitemap {
         }
     }
 
-    public static HttpResponse<InputStream> sendHttpClient(URI uri) throws InterruptedException, ExecutionException {
+    public static void getLinkType(String url, String type) {
+        try {
+            HttpResponse<InputStream> httpResponseU = sendHttpClient(new URI(url));
+            InputStream inputU = httpResponseU.body();
+            parseXml(inputU, type);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static HttpResponse<InputStream> sendHttpClient(URI uri) throws InterruptedException, IOException {
 
         HttpClient hl2 = HttpClient.newHttpClient();
         HttpRequest httpRequest = HttpRequest.newBuilder().GET().uri(uri).build();
-        HttpResponse<InputStream> httpResponse = hl2.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream()).get();
+        HttpResponse<InputStream> httpResponse = hl2.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
         log.info(getDateFormat() + " " + uri + " status code: " + httpResponse.statusCode());
         //System.out.println(getDateFormat() + " " + uri + " status code: " + httpResponse.statusCode());
         return httpResponse;
     }
-
 
     public static void parseXml(InputStream input, String type) {
         try {
@@ -116,4 +117,6 @@ public class ParserXmlSitemap {
         sdf.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
         return sdf.format(now);
     }
+
+
 }
