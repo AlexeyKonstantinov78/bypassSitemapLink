@@ -1,5 +1,7 @@
 package ru.alekseykonstantinov;
 
+import lombok.extern.slf4j.Slf4j;
+
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
@@ -15,7 +17,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+@Slf4j
 public class ParserXmlSitemap {
+    
     private static List<String> listXml = new ArrayList<>();
     private static List<String> listUrl = new ArrayList<>();
 
@@ -61,8 +65,8 @@ public class ParserXmlSitemap {
         HttpClient hl2 = HttpClient.newHttpClient();
         HttpRequest httpRequest = HttpRequest.newBuilder().GET().uri(uri).build();
         HttpResponse<InputStream> httpResponse = hl2.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
-        System.out.println(getDateFormat() + " " + uri + " status code: " + httpResponse.statusCode());
-
+        log.info(getDateFormat() + " " + uri + " status code: " + httpResponse.statusCode());
+        //System.out.println(getDateFormat() + " " + uri + " status code: " + httpResponse.statusCode());
         return httpResponse;
     }
 
