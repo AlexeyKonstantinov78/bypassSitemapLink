@@ -1,5 +1,7 @@
 package ru.alekseykonstantinov;
 
+import ru.alekseykonstantinov.logger.MyLogger;
+
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
@@ -17,7 +19,7 @@ import java.util.TimeZone;
 import java.util.logging.Logger;
 
 public class ParserXmlSitemap {
-    final static Logger log = Logger.getGlobal();
+    private static Logger logger = MyLogger.logger();
     private static List<String> listXml = new ArrayList<>();
     private static List<String> listUrl = new ArrayList<>();
     private static List<String> errorUrl = new ArrayList<>();
@@ -29,24 +31,25 @@ public class ParserXmlSitemap {
 
         if (!listXml.isEmpty()) {
 
-            log.info("Запуск обхода listXml");
+            //log.info("Запуск обхода listXml");
+            logger.info("Запуск обхода listXml");
 
             listXml.stream().forEach(urlXml ->
                     getLinkType(urlXml, "url")
             );
         }
 
-        log.info("Количество ссылок sitemap: " + listXml.size());
-        log.info("Количество всех ссылок на страницы: " + listUrl.size());
+        logger.info("Количество ссылок sitemap: " + listXml.size());
+        logger.info("Количество всех ссылок на страницы: " + listUrl.size());
 
         if (!listUrl.isEmpty()) {
-            log.info("Запуск обхода listUrl");
+            logger.info("Запуск обхода listUrl");
             listUrl.stream().forEach(urlPost ->
                     {
                         try {
                             sendHttpClient(new URI(urlPost));
                         } catch (Exception e) {
-                            throw new RuntimeException(e);
+                            logger.severe(e.getMessage());
                         }
                     }
             );
@@ -55,7 +58,7 @@ public class ParserXmlSitemap {
         if (!errorUrl.isEmpty()) {
             errorUrl.stream().forEach(System.out::println);
         } else {
-            log.info("Ошибок нет");
+            logger.info("Ошибок нет");
         }
     }
 
@@ -65,7 +68,8 @@ public class ParserXmlSitemap {
             InputStream inputU = httpResponseU.body();
             parseXml(inputU, type);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            logger.severe(e.getMessage());
+
         }
     }
 
@@ -74,7 +78,7 @@ public class ParserXmlSitemap {
         HttpClient hl2 = HttpClient.newHttpClient();
         HttpRequest httpRequest = HttpRequest.newBuilder().GET().uri(uri).build();
         HttpResponse<InputStream> httpResponse = hl2.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
-        log.info(uri + " status code: " + httpResponse.statusCode());
+        logger.info(uri + " status code: " + httpResponse.statusCode());
         if (httpResponse.statusCode() != 200) {
             errorUrl.add(uri + ";status code: " + httpResponse.statusCode());
         }
@@ -107,14 +111,14 @@ public class ParserXmlSitemap {
             }
 
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            logger.severe(e.getMessage());
         }
     }
 
     public static void printInputStream(InputStream input) throws IOException {
-        log.info("\nTeлo: ");
+        logger.info("\nTeлo: ");
         int с;
-        // Прочитать и отобразить все тело .
+        // Прочитать и отобразить все тело.
         while ((с = input.read()) != -1) {
             System.out.print((char) с);
         }
