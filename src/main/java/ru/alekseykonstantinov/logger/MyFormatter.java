@@ -36,9 +36,9 @@ public class MyFormatter extends Formatter {
         }
 
         return String.format(
-                "%s[%2$tF %2$tT] [%3$-7s] %4$s: %5$s %6$s %7$s %s%n",
+                "%1s[%2$s] [%3$-7s] %4$s: %5$s %6$s [%7$s] %n",
                 color,
-                new Date(record.getMillis()),
+                getDateFormat(),
                 record.getLevel().getName(),
                 record.getSourceClassName(),
                 record.getSourceMethodName(),
