@@ -7,7 +7,6 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -19,12 +18,12 @@ import java.util.TimeZone;
 import java.util.logging.Logger;
 
 public class ParserXmlSitemap {
-    private static Logger logger = MyLogger.logger();
+    private final static Logger logger = MyLogger.logger();
     private static List<String> listXml = new ArrayList<>();
     private static List<String> listUrl = new ArrayList<>();
     private static List<String> errorUrl = new ArrayList<>();
 
-    public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException {
+    public static void main(String[] args) {
         String url = "https://nasosyvodoly.ru/sitemap_index.xml";
 
         getLinkType(url, "sitemap");
@@ -39,8 +38,8 @@ public class ParserXmlSitemap {
             );
         }
 
-        logger.info("Количество ссылок sitemap: " + listXml.size());
-        logger.info("Количество всех ссылок на страницы: " + listUrl.size());
+        logger.info(String.format("Количество ссылок sitemap: %1d", listXml.size()));
+        logger.info(String.format("Количество всех ссылок на страницы: %1d", listUrl.size()));
 
         if (!listUrl.isEmpty()) {
             logger.info("Запуск обхода listUrl");
