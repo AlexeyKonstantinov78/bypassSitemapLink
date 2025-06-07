@@ -49,6 +49,7 @@ public class ParserXmlSitemap {
                             sendHttpClient(new URI(urlPost));
                         } catch (Exception e) {
                             logger.severe(e.getMessage());
+                            errorUrl.add(urlPost + ": " + e.getMessage());
                         }
                     }
             );
