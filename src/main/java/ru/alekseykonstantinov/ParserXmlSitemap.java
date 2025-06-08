@@ -7,6 +7,7 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -43,33 +44,48 @@ public class ParserXmlSitemap {
 
         if (!listUrl.isEmpty()) {
             logger.info("Запуск обхода listUrl");
+
             listUrl.stream().forEach(urlPost ->
                     {
                         try {
                             sendHttpClient(new URI(urlPost));
                         } catch (Exception e) {
                             logger.severe(e.getMessage());
-                            errorUrl.add(urlPost + ": " + e.getMessage());
+                            errorUrl.add(urlPost + "; " + e.getMessage());
                         }
                     }
             );
         }
 
         if (!errorUrl.isEmpty()) {
+            logger.info(String.format("Есть ошибки %d", errorUrl.size()));
             errorUrl.stream().forEach(System.out::println);
+            errorUrl.stream().forEach(str -> {
+                String urlErr = str.split(";")[0];
+                try {
+                    sendHttpClient(new URI(urlErr));
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         } else {
             logger.info("Ошибок нет");
         }
     }
 
     public static void getLinkType(String url, String type) {
-        try {
-            HttpResponse<InputStream> httpResponseU = sendHttpClient(new URI(url));
+
+        try (HttpClient hl2 = HttpClient.newHttpClient()) {
+            HttpResponse<InputStream> httpResponseU = sendHttpClient(hl2, new URI(url));
             InputStream inputU = httpResponseU.body();
             parseXml(inputU, type);
         } catch (Exception e) {
             logger.severe(e.getMessage());
-
+            errorUrl.add(String.format("%s; %s ", url, e.getMessage()));
         }
     }
 
@@ -78,9 +94,23 @@ public class ParserXmlSitemap {
         HttpClient hl2 = HttpClient.newHttpClient();
         HttpRequest httpRequest = HttpRequest.newBuilder().GET().uri(uri).build();
         HttpResponse<InputStream> httpResponse = hl2.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
-        logger.info(uri + " status code: " + httpResponse.statusCode());
+        logger.info(String.format("%s; status code: %s", uri, httpResponse.statusCode()));
         if (httpResponse.statusCode() != 200) {
-            errorUrl.add(uri + ";status code: " + httpResponse.statusCode());
+            errorUrl.add(String.format("%s; status code: %s", uri, httpResponse.statusCode()));
+            throw new IOException(String.format("Код: %s", httpResponse.statusCode()));
+        }
+
+        return httpResponse;
+    }
+
+    public static HttpResponse<InputStream> sendHttpClient(HttpClient hl2, URI uri) throws InterruptedException, IOException {
+
+        HttpRequest httpRequest = HttpRequest.newBuilder().GET().uri(uri).build();
+        HttpResponse<InputStream> httpResponse = hl2.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
+        logger.info(String.format("%s; status code: %s", uri, httpResponse.statusCode()));
+        if (httpResponse.statusCode() != 200) {
+            errorUrl.add(String.format("%s; status code: %s", uri, httpResponse.statusCode()));
+            throw new IOException(String.format("Код: %s", httpResponse.statusCode()));
         }
 
         return httpResponse;
@@ -111,7 +141,7 @@ public class ParserXmlSitemap {
             }
 
         } catch (Exception e) {
-            logger.severe(e.getMessage());
+            logger.severe(String.format("Ошибка в методе parseXml при parse %s %s", type, e.getMessage()));
         }
     }
 
