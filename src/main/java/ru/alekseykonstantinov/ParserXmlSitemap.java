@@ -130,11 +130,9 @@ public class ParserXmlSitemap {
                         listXml.add(loc);
                     }
 
-                    if (type.equals("url") && reader.getLocalName().equals("loc")) {
-                        if (reader.getLocalName().equals("loc") && !reader.getPrefix().equals("image")) {
-                            String loc = reader.getElementText();
-                            listUrl.add(loc);
-                        }
+                    if (type.equals("url") && reader.getLocalName().equals("loc") && !reader.getPrefix().equals("image")) {
+                        String loc = reader.getElementText();
+                        listUrl.add(loc);
                     }
                 }
             }
