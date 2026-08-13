@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 public class MyLogger {
     private static final Logger logger = Logger.getLogger(MyLogger.class.getName());
 
-    private MyLogger() {
+    static {
         // Убираем обработчики по умолчанию (если нужно)
         Logger rootLogger = Logger.getLogger("");
         Handler[] handlers = rootLogger.getHandlers();
@@ -25,8 +25,9 @@ public class MyLogger {
         logger.addHandler(handler);
     }
 
+    private MyLogger() {}
+
     public static Logger logger() {
-        MyLogger myLogger = new MyLogger();
         return logger;
     }
 }

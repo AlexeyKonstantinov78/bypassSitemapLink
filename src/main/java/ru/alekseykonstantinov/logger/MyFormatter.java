@@ -1,8 +1,7 @@
 package ru.alekseykonstantinov.logger;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
+import ru.alekseykonstantinov.util.Utility;
+
 import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -38,7 +37,7 @@ public class MyFormatter extends Formatter {
         return String.format(
                 "%1s[%2$s] [%3$-7s] %4$s: %5$s %6$s [%7$s] %n",
                 color,
-                getDateFormat(),
+                Utility.getDateFormat(),
                 record.getLevel().getName(),
                 record.getSourceClassName(),
                 record.getSourceMethodName(),
@@ -46,12 +45,5 @@ public class MyFormatter extends Formatter {
                 record.getMessage(),
                 ANSI_RESET
         );
-    }
-
-    public static String getDateFormat() {
-        Date now = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-        sdf.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
-        return sdf.format(now);
     }
 }

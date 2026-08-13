@@ -1,6 +1,4 @@
-package ru.alekseykonstantinov;
-
-import ru.alekseykonstantinov.logger.MyLogger;
+package ru.alekseykonstantinov.app;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
@@ -18,73 +16,58 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 
-public class ParserXmlSitemap {
-    private final static Logger logger = MyLogger.logger();
+
+public class ParserXmlSitemapAsync {
+    static Logger log = Logger.getGlobal();
     private static List<String> listXml = new ArrayList<>();
     private static List<String> listUrl = new ArrayList<>();
+    private static Boolean isAsync = true;
     private static List<String> errorUrl = new ArrayList<>();
 
-    public static void main(String[] args) {
+
+    public static void main(String[] args) throws URISyntaxException, IOException, InterruptedException {
         String url = "https://nasosyvodoly.ru/sitemap_index.xml";
 
         getLinkType(url, "sitemap");
 
         if (!listXml.isEmpty()) {
-
-            logger.info("Запуск обхода listXml");
+            log.info("Запуск обхода listXml");
 
             listXml.stream().forEach(urlXml ->
                     getLinkType(urlXml, "url")
             );
         }
 
-        logger.info(String.format("Количество ссылок sitemap: %1d", listXml.size()));
-        logger.info(String.format("Количество всех ссылок на страницы: %1d", listUrl.size()));
+        log.info("Количество ссылок sitemap: " + listXml.size());
+        log.info("Количество всех ссылок на страницы: " + listUrl.size());
 
         if (!listUrl.isEmpty()) {
-            logger.info("Запуск обхода listUrl");
-
+            log.info("Запуск обхода listUrl");
             listUrl.stream().forEach(urlPost ->
                     {
                         try {
-                            sendHttpClient(new URI(urlPost));
+                            sendHttpClientAsync(new URI(urlPost));
                         } catch (Exception e) {
-                            logger.severe(e.getMessage());
-                            errorUrl.add(urlPost + "; " + e.getMessage());
+                            throw new RuntimeException(e);
                         }
                     }
             );
         }
 
         if (!errorUrl.isEmpty()) {
-            logger.info(String.format("Есть ошибки %d", errorUrl.size()));
             errorUrl.stream().forEach(System.out::println);
-            errorUrl.stream().forEach(str -> {
-                String urlErr = str.split(";")[0];
-                try {
-                    sendHttpClient(new URI(urlErr));
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
-                }
-            });
         } else {
-            logger.info("Ошибок нет");
+            log.info("Ошибок нет");
         }
     }
 
     public static void getLinkType(String url, String type) {
-
-        try (HttpClient hl2 = HttpClient.newHttpClient()) {
-            HttpResponse<InputStream> httpResponseU = sendHttpClient(hl2, new URI(url));
+        try {
+            HttpResponse<InputStream> httpResponseU = sendHttpClient(new URI(url));
             InputStream inputU = httpResponseU.body();
             parseXml(inputU, type);
         } catch (Exception e) {
-            logger.severe(e.getMessage());
-            errorUrl.add(String.format("%s; %s ", url, e.getMessage()));
+            throw new RuntimeException(e);
         }
     }
 
@@ -93,26 +76,21 @@ public class ParserXmlSitemap {
         HttpClient hl2 = HttpClient.newHttpClient();
         HttpRequest httpRequest = HttpRequest.newBuilder().GET().uri(uri).build();
         HttpResponse<InputStream> httpResponse = hl2.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
-        logger.info(String.format("%s; status code: %s", uri, httpResponse.statusCode()));
-        if (httpResponse.statusCode() != 200) {
-            errorUrl.add(String.format("%s; status code: %s", uri, httpResponse.statusCode()));
-            throw new IOException(String.format("Код: %s", httpResponse.statusCode()));
-        }
+        log.info(getDateFormat() + " " + uri + " status code: " + httpResponse.statusCode());
 
         return httpResponse;
     }
 
-    public static HttpResponse<InputStream> sendHttpClient(HttpClient hl2, URI uri) throws InterruptedException, IOException {
-
+    public static void sendHttpClientAsync(URI uri) {
+        HttpClient hl2 = HttpClient.newHttpClient();
         HttpRequest httpRequest = HttpRequest.newBuilder().GET().uri(uri).build();
-        HttpResponse<InputStream> httpResponse = hl2.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
-        logger.info(String.format("%s; status code: %s", uri, httpResponse.statusCode()));
-        if (httpResponse.statusCode() != 200) {
-            errorUrl.add(String.format("%s; status code: %s", uri, httpResponse.statusCode()));
-            throw new IOException(String.format("Код: %s", httpResponse.statusCode()));
-        }
-
-        return httpResponse;
+        hl2.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofInputStream())
+                .thenAccept(response -> {
+                    log.info(getDateFormat() + " " + uri + " status code: " + response.statusCode());
+                    if (response.statusCode() != 200) {
+                        errorUrl.add(uri + " status code: " + response.statusCode());
+                    }
+                });
     }
 
     public static void parseXml(InputStream input, String type) {
@@ -130,21 +108,24 @@ public class ParserXmlSitemap {
                         listXml.add(loc);
                     }
 
-                    if (type.equals("url") && reader.getLocalName().equals("loc") && !reader.getPrefix().equals("image")) {
-                        String loc = reader.getElementText();
-                        listUrl.add(loc);
+                    if (type.equals("url") && reader.getLocalName().equals("loc")) {
+                        if (reader.getLocalName().equals("loc")) {
+                            String loc = reader.getElementText();
+                            listUrl.add(loc);
+                        }
                     }
                 }
             }
+
         } catch (Exception e) {
-            logger.severe(String.format("Ошибка в методе parseXml при parse %s %s", type, e.getMessage()));
+            throw new RuntimeException(e);
         }
     }
 
     public static void printInputStream(InputStream input) throws IOException {
-        logger.info("\nTeлo: ");
+        log.info("\nTeлo: ");
         int с;
-        // Прочитать и отобразить все тело.
+        // Прочитать и отобразить все тело .
         while ((с = input.read()) != -1) {
             System.out.print((char) с);
         }

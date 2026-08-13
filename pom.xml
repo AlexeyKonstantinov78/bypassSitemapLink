@@ -6,7 +6,7 @@
 
     <groupId>ru.alekseykonstantinov</groupId>
     <artifactId>parserSItemapNasosyvodoley</artifactId>
-    <version>1.5</version>
+    <version>1.6</version>
 
     <build>
         <plugins>
@@ -17,7 +17,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>ru.alekseykonstantinov.ParserXmlSitemap</mainClass>
+                            <mainClass>ru.alekseykonstantinov.app.ParserXmlSitemap</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

@@ -1,0 +1,75 @@
+package ru.alekseykonstantinov.app;
+
+import ru.alekseykonstantinov.logger.MyLogger;
+import ru.alekseykonstantinov.service.LinkType;
+import ru.alekseykonstantinov.service.ParseXml;
+import ru.alekseykonstantinov.service.SendingRequest;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.logging.Logger;
+
+public class ParserXmlSitemap {
+
+    private final static Logger logger = MyLogger.logger();
+
+    private static SendingRequest sendingRequest = new SendingRequest();
+    private static ParseXml parseXml = new ParseXml();
+    private static LinkType linkType = new LinkType(sendingRequest, parseXml);
+
+    public static void main(String[] args) {
+
+        String url = "https://nasosyvodoly.ru/sitemap_index.xml";
+
+        linkType.getLinkType(url, "sitemap");
+
+        List<String> listXml = parseXml.getListXml();
+        if (!listXml.isEmpty()) {
+            logger.info("Запуск обхода listXml");
+            listXml.stream().forEach(urlXml ->
+                    linkType.getLinkType(urlXml, "url")
+            );
+        }
+
+        List<String> listUrl = parseXml.getListUrl();
+        logger.info(String.format("Количество ссылок sitemap: %1d", listXml.size()));
+        logger.info(String.format("Количество всех ссылок на страницы: %1d", listUrl.size()));
+
+        if (!listUrl.isEmpty()) {
+            logger.info("Запуск обхода listUrl");
+
+            listUrl.stream().forEach(urlPost ->
+                    {
+                        try {
+                            sendingRequest.sendHttpClient(new URI(urlPost));
+                        } catch (Exception e) {
+                            logger.severe(e.getMessage());
+                            sendingRequest.addErr(urlPost + "; " + e.getMessage());
+                        }
+                    }
+            );
+        }
+
+        List<String> sendErrorUrl = sendingRequest.getErrorUrl();
+
+        if (!sendErrorUrl.isEmpty()) {
+            logger.info(String.format("Есть ошибки %d", sendErrorUrl.size()));
+            sendErrorUrl.stream().forEach(System.out::println);
+            sendErrorUrl.stream().forEach(str -> {
+                String urlErr = str.split(";")[0];
+                try {
+                    sendingRequest.sendHttpClient(new URI(urlErr));
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } else {
+            logger.info("Ошибок нет");
+        }
+    }
+}
