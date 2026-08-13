@@ -4,6 +4,7 @@ import ru.alekseykonstantinov.logger.MyLogger;
 import ru.alekseykonstantinov.service.LinkType;
 import ru.alekseykonstantinov.service.ParseXml;
 import ru.alekseykonstantinov.service.SendingRequest;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -12,13 +13,12 @@ import java.util.logging.Logger;
 
 public class ParserXmlSitemap {
 
-    private final static Logger logger = MyLogger.logger();
-
-    private static SendingRequest sendingRequest = new SendingRequest();
-    private static ParseXml parseXml = new ParseXml();
-    private static LinkType linkType = new LinkType(sendingRequest, parseXml);
-
     public static void main(String[] args) {
+        final Logger logger = MyLogger.logger();
+
+        final SendingRequest sendingRequest = new SendingRequest();
+        final ParseXml parseXml = new ParseXml();
+        final LinkType linkType = new LinkType(sendingRequest, parseXml);
 
         String url = "https://nasosyvodoly.ru/sitemap_index.xml";
 

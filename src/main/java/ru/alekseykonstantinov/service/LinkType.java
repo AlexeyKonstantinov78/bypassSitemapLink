@@ -9,9 +9,9 @@ import java.net.http.HttpResponse;
 import java.util.logging.Logger;
 
 public class LinkType {
-    private final static Logger logger = MyLogger.logger();
-    private SendingRequest sendingRequest;
-    private ParseXml parseXml;
+    private final Logger logger = MyLogger.logger();
+    private final SendingRequest sendingRequest;
+    private final ParseXml parseXml;
 
     public LinkType(SendingRequest sendingRequest, ParseXml parseXml) {
         this.sendingRequest = sendingRequest;
