@@ -31,7 +31,6 @@ public class ParserXmlSitemap {
 
         if (!listXml.isEmpty()) {
 
-            //log.info("Запуск обхода listXml");
             logger.info("Запуск обхода listXml");
 
             listXml.stream().forEach(urlXml ->
@@ -132,14 +131,13 @@ public class ParserXmlSitemap {
                     }
 
                     if (type.equals("url") && reader.getLocalName().equals("loc")) {
-                        if (reader.getLocalName().equals("loc")) {
+                        if (reader.getLocalName().equals("loc") && !reader.getPrefix().equals("image")) {
                             String loc = reader.getElementText();
                             listUrl.add(loc);
                         }
                     }
                 }
             }
-
         } catch (Exception e) {
             logger.severe(String.format("Ошибка в методе parseXml при parse %s %s", type, e.getMessage()));
         }
