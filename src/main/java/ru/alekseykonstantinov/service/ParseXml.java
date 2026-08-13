@@ -11,8 +11,8 @@ import java.util.logging.Logger;
 
 public class ParseXml {
     private final static Logger logger = MyLogger.logger();
-    private static List<String> listXml = new ArrayList<>();
-    private static List<String> listUrl = new ArrayList<>();
+    private static final List<String> listXml = new ArrayList<>();
+    private static final List<String> listUrl = new ArrayList<>();
 
     public void parseXml(InputStream input, String type) {
         try {
