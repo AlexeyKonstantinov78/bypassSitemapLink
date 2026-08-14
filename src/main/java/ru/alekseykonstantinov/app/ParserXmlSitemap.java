@@ -5,9 +5,7 @@ import ru.alekseykonstantinov.service.LinkType;
 import ru.alekseykonstantinov.service.ParseXml;
 import ru.alekseykonstantinov.service.SendingRequest;
 
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -27,7 +25,7 @@ public class ParserXmlSitemap {
         List<String> listXml = parseXml.getListXml();
         if (!listXml.isEmpty()) {
             logger.info("Запуск обхода listXml");
-            listXml.stream().forEach(urlXml ->
+            listXml.forEach(urlXml ->
                     linkType.getLinkType(urlXml, "url")
             );
         }
@@ -39,7 +37,7 @@ public class ParserXmlSitemap {
         if (!listUrl.isEmpty()) {
             logger.info("Запуск обхода listUrl");
 
-            listUrl.stream().forEach(urlPost ->
+            listUrl.forEach(urlPost ->
                     {
                         try {
                             sendingRequest.sendHttpClient(new URI(urlPost));
@@ -55,17 +53,13 @@ public class ParserXmlSitemap {
 
         if (!sendErrorUrl.isEmpty()) {
             logger.info(String.format("Есть ошибки %d", sendErrorUrl.size()));
-            sendErrorUrl.stream().forEach(System.out::println);
-            sendErrorUrl.stream().forEach(str -> {
+            sendErrorUrl.forEach(logger::warning);
+            sendErrorUrl.forEach(str -> {
                 String urlErr = str.split(";")[0];
                 try {
                     sendingRequest.sendHttpClient(new URI(urlErr));
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
+                } catch (Exception e) {
+                    logger.warning(e.getMessage());
                 }
             });
         } else {
