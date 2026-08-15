@@ -55,6 +55,7 @@ public class ParserXmlSitemap {
             logger.info(String.format("Есть ошибки %d", sendErrorUrl.size()));
             sendErrorUrl.forEach(logger::warning);
             sendErrorUrl.forEach(str -> {
+                logger.info("Проход по ошибкам");
                 String urlErr = str.split(";")[0];
                 try {
                     sendingRequest.sendHttpClient(new URI(urlErr));
