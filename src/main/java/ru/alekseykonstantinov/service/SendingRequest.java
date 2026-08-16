@@ -50,4 +50,8 @@ public class SendingRequest {
     public void addErr(String err) {
         errorUrl.add(err);
     }
+
+    public void deleteErrLinkFirst() {
+        errorUrl.removeFirst();
+    }
 }

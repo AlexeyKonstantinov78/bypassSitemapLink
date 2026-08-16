@@ -6,7 +6,7 @@
 
     <groupId>ru.alekseykonstantinov</groupId>
     <artifactId>parserSItemapNasosyvodoley</artifactId>
-    <version>1.7.1</version>
+    <version>1.8.0</version>
 
     <build>
         <plugins>
@@ -58,6 +58,13 @@
             <groupId>javax.xml.stream</groupId>
             <artifactId>stax-api</artifactId>
             <version>1.0-2</version>
+        </dependency>
+        <!-- Source: https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>6.1.1</version>
+            <scope>test</scope>
         </dependency>
 
 

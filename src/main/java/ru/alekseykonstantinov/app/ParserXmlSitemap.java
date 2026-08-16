@@ -12,6 +12,8 @@ import java.util.logging.Logger;
 public class ParserXmlSitemap {
 
     public static void main(String[] args) {
+        boolean errLink = true;
+
         final Logger logger = MyLogger.logger();
 
         final SendingRequest sendingRequest = new SendingRequest();
@@ -49,22 +51,25 @@ public class ParserXmlSitemap {
             );
         }
 
-        List<String> sendErrorUrl = sendingRequest.getErrorUrl();
-
-        if (!sendErrorUrl.isEmpty()) {
+        while (errLink) {
+            List<String> sendErrorUrl = sendingRequest.getErrorUrl();
+            if  (sendErrorUrl.isEmpty()) {
+                logger.info("Ошибок нет");
+                break;
+            }
             logger.info(String.format("Есть ошибки %d", sendErrorUrl.size()));
-            sendErrorUrl.forEach(logger::warning);
-            sendErrorUrl.forEach(str -> {
-                logger.info("Проход по ошибкам");
-                String urlErr = str.split(";")[0];
-                try {
-                    sendingRequest.sendHttpClient(new URI(urlErr));
-                } catch (Exception e) {
-                    logger.warning(e.getMessage());
-                }
-            });
-        } else {
-            logger.info("Ошибок нет");
+            logger.info("Проход по ошибкам");
+
+            String urlErr = sendErrorUrl.getFirst().split(";")[0];
+
+            try {
+                sendingRequest.sendHttpClient(new URI(urlErr));
+                sendingRequest.deleteErrLinkFirst();
+            } catch (Exception e) {
+                logger.warning(e.getMessage());
+            }
+
+            errLink = !sendingRequest.getErrorUrl().isEmpty();
         }
     }
 }
