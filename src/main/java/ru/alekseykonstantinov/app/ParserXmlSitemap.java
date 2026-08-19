@@ -36,6 +36,8 @@ public class ParserXmlSitemap {
         logger.info(String.format("Количество ссылок sitemap: %1d", listXml.size()));
         logger.info(String.format("Количество всех ссылок на страницы: %1d", listUrl.size()));
 
+        parseXml.saveUrl();
+
         if (!listUrl.isEmpty()) {
             logger.info("Запуск обхода listUrl");
 

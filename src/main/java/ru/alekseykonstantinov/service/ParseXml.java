@@ -1,9 +1,12 @@
 package ru.alekseykonstantinov.service;
 
 import ru.alekseykonstantinov.logger.MyLogger;
+import ru.alekseykonstantinov.storage.LinkFileStorage;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +16,11 @@ public class ParseXml {
     private final static Logger logger = MyLogger.logger();
     private final List<String> listXml = new ArrayList<>();
     private final List<String> listUrl = new ArrayList<>();
+    private final LinkFileStorage linkFileStorage;
+
+    public ParseXml() {
+        this.linkFileStorage = new LinkFileStorage();
+    }
 
     public void parseXml(InputStream input, String type) {
         try {
@@ -46,5 +54,14 @@ public class ParseXml {
 
     public List<String> getListUrl() {
         return new ArrayList<>(listUrl);
+    }
+
+    public boolean saveUrl() {
+        try {
+            linkFileStorage.saveLink(getListUrl());
+        }  catch (FileNotFoundException ex) {
+            return false;
+        }
+        return true;
     }
 }
