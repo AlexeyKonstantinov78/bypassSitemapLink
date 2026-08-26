@@ -1,6 +1,7 @@
 package ru.alekseykonstantinov.service;
 
 import ru.alekseykonstantinov.logger.MyLogger;
+import ru.alekseykonstantinov.model.Link;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +15,7 @@ import java.util.logging.Logger;
 
 public class SendingRequest {
     private final Logger logger = MyLogger.logger();
-    private final List<String> errorUrl = new ArrayList<>();
+    private final List<Link> errorUrl = new ArrayList<>();
 
     public HttpResponse<InputStream> sendHttpClient(URI uri) throws InterruptedException, IOException {
 
@@ -23,7 +24,7 @@ public class SendingRequest {
         HttpResponse<InputStream> httpResponse = hl2.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
         logger.info(String.format("%s; status code: %s", uri, httpResponse.statusCode()));
         if (httpResponse.statusCode() != 200) {
-            errorUrl.add(String.format("%s; status code: %s", uri, httpResponse.statusCode()));
+            errorUrl.add(new Link(String.format("%s; status code: %s", uri, httpResponse.statusCode())));
             throw new IOException(String.format("Код: %s", httpResponse.statusCode()));
         }
 
@@ -36,18 +37,18 @@ public class SendingRequest {
         HttpResponse<InputStream> httpResponse = hl2.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
         logger.info(String.format("%s; status code: %s", uri, httpResponse.statusCode()));
         if (httpResponse.statusCode() != 200) {
-            errorUrl.add(String.format("%s; status code: %s", uri, httpResponse.statusCode()));
+            errorUrl.add(new Link(String.format("%s; status code: %s", uri, httpResponse.statusCode())));
             throw new IOException(String.format("Код: %s", httpResponse.statusCode()));
         }
 
         return httpResponse;
     }
 
-    public List<String> getErrorUrl() {
+    public List<Link> getErrorUrl() {
         return new ArrayList<>(errorUrl);
     }
 
-    public void addErr(String err) {
+    public void addErr(Link err) {
         errorUrl.add(err);
     }
 

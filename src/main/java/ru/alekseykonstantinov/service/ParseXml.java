@@ -1,6 +1,8 @@
 package ru.alekseykonstantinov.service;
 
 import ru.alekseykonstantinov.logger.MyLogger;
+import ru.alekseykonstantinov.model.Link;
+import ru.alekseykonstantinov.model.XmlUrl;
 import ru.alekseykonstantinov.storage.LinkFileStorage;
 
 import javax.xml.stream.XMLInputFactory;
@@ -14,8 +16,8 @@ import java.util.logging.Logger;
 
 public class ParseXml {
     private final static Logger logger = MyLogger.logger();
-    private final List<String> listXml = new ArrayList<>();
-    private final List<String> listUrl = new ArrayList<>();
+    private final List<XmlUrl> listXml = new ArrayList<>();
+    private final List<Link> listUrl = new ArrayList<>();
     private final LinkFileStorage linkFileStorage;
 
     public ParseXml() {
@@ -34,12 +36,12 @@ public class ParseXml {
 
                     if (type.equals("sitemap") && reader.getLocalName().equals("loc")) {
                         String loc = reader.getElementText();
-                        listXml.add(loc);
+                        listXml.add(new XmlUrl(loc));
                     }
 
                     if (type.equals("url") && reader.getLocalName().equals("loc") && !reader.getPrefix().equals("image")) {
                         String loc = reader.getElementText();
-                        listUrl.add(loc);
+                        listUrl.add(new Link(loc));
                     }
                 }
             }
@@ -48,11 +50,11 @@ public class ParseXml {
         }
     }
 
-    public List<String> getListXml() {
+    public List<XmlUrl> getListXml() {
         return new ArrayList<>(listXml);
     }
 
-    public List<String> getListUrl() {
+    public List<Link> getListUrl() {
         return new ArrayList<>(listUrl);
     }
 

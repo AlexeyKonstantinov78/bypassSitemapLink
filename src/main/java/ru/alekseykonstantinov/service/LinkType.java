@@ -1,6 +1,8 @@
 package ru.alekseykonstantinov.service;
 
 import ru.alekseykonstantinov.logger.MyLogger;
+import ru.alekseykonstantinov.model.Link;
+import ru.alekseykonstantinov.model.XmlUrl;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -18,14 +20,25 @@ public class LinkType {
         this.parseXml = parseXml;
     }
 
-    public void getLinkType(String url, String type) {
+    public void getLinkType(XmlUrl url, String type) {
         try (HttpClient hl2 = HttpClient.newHttpClient()) {
-            HttpResponse<InputStream> httpResponseU = sendingRequest.sendHttpClient(hl2, new URI(url));
+            HttpResponse<InputStream> httpResponseU = sendingRequest.sendHttpClient(hl2, new URI(url.url()));
             InputStream inputU = httpResponseU.body();
             parseXml.parseXml(inputU, type);
         } catch (Exception e) {
             logger.severe(e.getMessage());
-            sendingRequest.addErr(String.format("%s; %s ", url, e.getMessage()));
+            sendingRequest.addErr(new Link(String.format("%s; %s ", url, e.getMessage())));
+        }
+    }
+
+    public void getLinkType(Link url, String type) {
+        try (HttpClient hl2 = HttpClient.newHttpClient()) {
+            HttpResponse<InputStream> httpResponseU = sendingRequest.sendHttpClient(hl2, new URI(url.link()));
+            InputStream inputU = httpResponseU.body();
+            parseXml.parseXml(inputU, type);
+        } catch (Exception e) {
+            logger.severe(e.getMessage());
+            sendingRequest.addErr(new Link(String.format("%s; %s ", url, e.getMessage())));
         }
     }
 }

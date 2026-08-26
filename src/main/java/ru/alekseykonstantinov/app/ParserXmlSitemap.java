@@ -1,6 +1,8 @@
 package ru.alekseykonstantinov.app;
 
 import ru.alekseykonstantinov.logger.MyLogger;
+import ru.alekseykonstantinov.model.Link;
+import ru.alekseykonstantinov.model.XmlUrl;
 import ru.alekseykonstantinov.service.LinkType;
 import ru.alekseykonstantinov.service.ParseXml;
 import ru.alekseykonstantinov.service.SendingRequest;
@@ -21,11 +23,11 @@ public class ParserXmlSitemap {
         final ParseXml parseXml = new ParseXml();
         final LinkType linkType = new LinkType(sendingRequest, parseXml);
 
-        String url = "https://nasosyvodoly.ru/sitemap_index.xml";
+        XmlUrl url = new XmlUrl("https://nasosyvodoly.ru/sitemap_index.xml");
 
         linkType.getLinkType(url, "sitemap");
 
-        List<String> listXml = parseXml.getListXml();
+        List<XmlUrl> listXml = parseXml.getListXml();
         if (!listXml.isEmpty()) {
             logger.info("Запуск обхода listXml");
             listXml.forEach(urlXml ->
@@ -33,7 +35,7 @@ public class ParserXmlSitemap {
             );
         }
 
-        List<String> listUrl = parseXml.getListUrl();
+        List<Link> listUrl = parseXml.getListUrl();
         logger.info(String.format("Количество ссылок sitemap: %1d", listXml.size()));
         logger.info(String.format("Количество всех ссылок на страницы: %1d", listUrl.size()));
 
@@ -47,17 +49,17 @@ public class ParserXmlSitemap {
             listUrl.forEach(urlPost ->
                     {
                         try {
-                            sendingRequest.sendHttpClient(new URI(urlPost));
+                            sendingRequest.sendHttpClient(new URI(urlPost.link()));
                         } catch (Exception e) {
                             logger.severe(e.getMessage());
-                            sendingRequest.addErr(urlPost + "; " + e.getMessage());
+                            sendingRequest.addErr(new Link(urlPost + "; " + e.getMessage()));
                         }
                     }
             );
         }
 
         while (errLink) {
-            List<String> sendErrorUrl = sendingRequest.getErrorUrl();
+            List<Link> sendErrorUrl = sendingRequest.getErrorUrl();
             if (sendErrorUrl.isEmpty()) {
                 logger.info("Ошибок нет");
                 break;
@@ -65,7 +67,7 @@ public class ParserXmlSitemap {
             logger.info(String.format("Есть ошибки %d", sendErrorUrl.size()));
             logger.info("Проход по ошибкам");
 
-            String urlErr = sendErrorUrl.getFirst().split(";")[0];
+            String urlErr = sendErrorUrl.getFirst().link().split(";")[0];
 
             try {
                 sendingRequest.sendHttpClient(new URI(urlErr));
@@ -77,6 +79,4 @@ public class ParserXmlSitemap {
             errLink = !sendingRequest.getErrorUrl().isEmpty();
         }
     }
-
-
 }
