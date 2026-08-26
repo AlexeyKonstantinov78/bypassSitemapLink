@@ -4,6 +4,7 @@ import ru.alekseykonstantinov.logger.MyLogger;
 import ru.alekseykonstantinov.service.LinkType;
 import ru.alekseykonstantinov.service.ParseXml;
 import ru.alekseykonstantinov.service.SendingRequest;
+import ru.alekseykonstantinov.util.Utility;
 
 import java.net.URI;
 import java.util.List;
@@ -36,7 +37,9 @@ public class ParserXmlSitemap {
         logger.info(String.format("Количество ссылок sitemap: %1d", listXml.size()));
         logger.info(String.format("Количество всех ссылок на страницы: %1d", listUrl.size()));
 
-        parseXml.saveUrl();
+        if (args.length > 0 && Utility.searchMatchParameters("save", args)) {
+            parseXml.saveUrl();
+        }
 
         if (!listUrl.isEmpty()) {
             logger.info("Запуск обхода listUrl");
@@ -55,7 +58,7 @@ public class ParserXmlSitemap {
 
         while (errLink) {
             List<String> sendErrorUrl = sendingRequest.getErrorUrl();
-            if  (sendErrorUrl.isEmpty()) {
+            if (sendErrorUrl.isEmpty()) {
                 logger.info("Ошибок нет");
                 break;
             }
@@ -74,4 +77,6 @@ public class ParserXmlSitemap {
             errLink = !sendingRequest.getErrorUrl().isEmpty();
         }
     }
+
+
 }

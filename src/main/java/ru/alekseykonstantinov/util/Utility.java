@@ -27,4 +27,15 @@ public class Utility {
             System.out.print((char) с);
         }
     }
+
+    public static boolean searchMatchParameters(String param, String[] args) {
+
+        for (String arg : args) {
+            if (arg.equals(param)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
