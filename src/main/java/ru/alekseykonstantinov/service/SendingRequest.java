@@ -19,12 +19,16 @@ public class SendingRequest {
 
     public HttpResponse<InputStream> sendHttpClient(URI uri) throws InterruptedException, IOException {
 
+        Long start = System.nanoTime();
+
         HttpClient hl2 = HttpClient.newHttpClient();
         HttpRequest httpRequest = HttpRequest.newBuilder().GET().uri(uri).build();
         HttpResponse<InputStream> httpResponse = hl2.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
-        logger.info(String.format("%s; status code: %s", uri, httpResponse.statusCode()));
+        long end = System.nanoTime();
+        double time = (end - start) / 1_000_000_000.0;
+        logger.info(String.format("%s; status code: %s time(сек.) %s", uri, httpResponse.statusCode(), time));
         if (httpResponse.statusCode() != 200) {
-            errorUrl.add(new Link(String.format("%s; status code: %s", uri, httpResponse.statusCode())));
+            errorUrl.add(new Link(String.format("%s; status code: %s time(сек.) %s", uri, httpResponse.statusCode(), time)));
             throw new IOException(String.format("Код: %s", httpResponse.statusCode()));
         }
 
@@ -32,12 +36,15 @@ public class SendingRequest {
     }
 
     public HttpResponse<InputStream> sendHttpClient(HttpClient hl2, URI uri) throws InterruptedException, IOException {
+        Long start = System.nanoTime();
 
         HttpRequest httpRequest = HttpRequest.newBuilder().GET().uri(uri).build();
         HttpResponse<InputStream> httpResponse = hl2.send(httpRequest, HttpResponse.BodyHandlers.ofInputStream());
-        logger.info(String.format("%s; status code: %s", uri, httpResponse.statusCode()));
+        long end = System.nanoTime();
+        double time = (end - start) / 1_000_000_000.0;
+        logger.info(String.format("%s; status code: %s time(сек.) %s", uri, httpResponse.statusCode(), time));
         if (httpResponse.statusCode() != 200) {
-            errorUrl.add(new Link(String.format("%s; status code: %s", uri, httpResponse.statusCode())));
+            errorUrl.add(new Link(String.format("%s; status code: %s time(сек.) %s", uri, httpResponse.statusCode(), time)));
             throw new IOException(String.format("Код: %s", httpResponse.statusCode()));
         }
 
